@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>SMS - View Santri Lite</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <!-- ═══ PWA Meta Tags ═══ -->
+    <meta name="theme-color" content="#04432A">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="SMS Santri Lite">
+    <meta name="application-name" content="SMS Santri Lite">
+    <meta name="description" content="Aplikasi Ringan Manajemen Data Santri">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="./icons/apple-touch-icon.png">
+
+    <style>
+        /* CSS PERSIS SAMA DENGAN INDEX 1 (26).html */
+        :root {
+            --primary: #04432A;
+            --primary-light: #0B6B46;
+            --accent: #D4AF37;
+            --accent-light: #F4E29F;
+            --text-main: #1D1D1F;
+            --text-muted: #6E6E73;
+            --danger: #FF3B30;
+            --success: #34C759;
+            --warning: #FF9500;
+            --info: #007AFF;
+            
+            --glass-card: rgba(255, 255, 255, 0.45);
+            --glass-border: rgba(255, 255, 255, 0.65);
+            --glass-shadow: 0 8px 32px rgba(31, 38, 135, 0.12);
+            --glass-glow: rgba(4, 67, 42, 0.15);
+            --radius-lg: 28px;
+            --radius-md: 20px;
+            --radius-sm: 14px;
+        }
+
+        * { box-sizing: border-box !important; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); background-attachment: fixed; color: var(--text-main); display: flex; justify-content: center; overflow-x: hidden; width: 100%; min-height: 100vh; }
+        .app-container { width: 100%; max-width: 500px; min-height: 100vh; background: radial-gradient(circle at 10% 15%, var(--glass-glow) 0%, transparent 45%), radial-gradient(circle at 90% 85%, rgba(212, 175, 55, 0.14) 0%, transparent 45%), #F5F5F7; position: relative; box-shadow: 0 0 65px rgba(0,0,0,0.4); display: flex; flex-direction: column; margin: 0 auto; transition: background 0.4s ease; }
+        .glass-panel { background: var(--glass-card); backdrop-filter: blur(40px) saturate(200%); -webkit-backdrop-filter: blur(40px) saturate(200%); border: 1px solid var(--glass-border); box-shadow: var(--glass-shadow); }
+        .login-wrapper { background-size: cover; background-position: center; min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 15px; position: relative; z-index: 10; width: 100%; }
+        .login-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.45); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); z-index: -1; transition: all 0.3s ease; }
+        .glass-card-login { background: rgba(255, 255, 255, 0.15) !important; backdrop-filter: blur(40px) saturate(200%); -webkit-backdrop-filter: blur(40px) saturate(200%); border: 1px solid rgba(255, 255, 255, 0.28) !important; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4) !important; border-radius: 28px; padding: 20px 18px !important; width: 100%; max-width: 330px; }
+        .glass-card-login h2 { color: #ffffff !important; text-shadow: 0 2px 8px rgba(0,0,0,0.3); font-size: 1.1rem; }
+        .glass-card-login input, .glass-card-login select { background: rgba(255, 255, 255, 0.9) !important; border: 1px solid rgba(255,255,255,0.6); position: relative; z-index: 50; border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; font-size: 0.95rem; }
+        
+        header { background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: white; padding: calc(14px + env(safe-area-inset-top, 0px)) 18px 16px 18px; border-bottom-left-radius: var(--radius-lg); border-bottom-right-radius: var(--radius-lg); position: sticky; top: 0; z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.18); border-bottom: 3px solid var(--accent); width: 100%; transition: 0.35s all ease; }
+        .header-top { display: flex; justify-content: space-between; align-items: center; width: 100%; position: relative; gap: 10px; }
+        .header-logo { width: 44px; height: 44px; background: white; border-radius: 50%; padding: 2px; border: 2px solid var(--accent); object-fit: cover; }
+        
+        .user-profile-btn { display: flex; align-items: center; gap: 8px; background: rgba(255, 255, 255, 0.18); padding: 5px 12px 5px 6px; border-radius: 24px; cursor: pointer; border: 1px solid rgba(255, 255, 255, 0.35); transition: 0.25s all ease; backdrop-filter: blur(10px); }
+        .user-profile-btn img { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--accent); background: #fff; }
+        .user-profile-btn span { font-size: 0.78rem; font-weight: 700; color: #ffffff; max-width: 90px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        .profile-dropdown-menu { position: absolute; right: 0; top: 52px; background: rgba(255, 255, 255, 0.96); backdrop-filter: blur(25px); border-radius: 18px; box-shadow: 0 15px 35px rgba(0,0,0,0.3); width: 210px; color: var(--text-main); overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.8); z-index: 1005; transition: 0.2s all ease; transform-origin: top right; }
+        .dropdown-item { padding: 12px 14px; font-size: 0.8rem; font-weight: 600; display: flex; align-items: center; gap: 10px; cursor: pointer; border-bottom: 1px solid rgba(0,0,0,0.04); }
+
+        main { flex: 1; position: relative; z-index: 20; width: 100%; padding-bottom: 30px; }
+        .card { background: rgba(255, 255, 255, 0.82); backdrop-filter: blur(25px) saturate(180%); border: 1px solid rgba(255, 255, 255, 0.85); border-radius: var(--radius-md); padding: 20px 16px; box-shadow: var(--glass-shadow); margin-bottom: 18px; width: 100%; }
+        .card-premium { border-left: 5px solid var(--accent); }
+        
+        label { font-size: 0.84rem; font-weight: 600; color: var(--primary); margin-bottom: 6px; display: block; margin-top: 10px; }
+        select, input, textarea { width: 100%; padding: 13px 15px; border-radius: var(--radius-sm); border: 1px solid rgba(0,0,0,0.12); margin-bottom: 10px; font-size: 0.95rem; outline: none; background: rgba(255,255,255,0.92); transition: 0.3s; box-shadow: inset 0 2px 4px rgba(0,0,0,0.03); }
+        button { width: 100%; padding: 14px; border-radius: var(--radius-sm); font-size: 0.95rem; outline: none; transition: 0.25s all ease; margin-top: 14px; margin-bottom: 6px; cursor: pointer; font-weight: 600; }
+        
+        .btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: white; border: none; box-shadow: 0 8px 20px var(--glass-glow); }
+        .btn-outline { background: rgba(255,255,255,0.65); color: var(--primary); border: 1.5px solid var(--primary); display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 13px 16px; }
+        .btn-danger { background: var(--danger); color: white; border: none; padding: 10px 14px; border-radius: 10px; width: auto; font-size: 0.82rem; margin-top: 0; }
+        .btn-warning { background: var(--warning); color: white; border: none; padding: 10px 14px; border-radius: 10px; width: auto; font-size: 0.82rem; margin-top: 0; }
+        .btn-print { background: #1D1D1F; color: white; border: none; padding: 10px 14px; border-radius: 10px; width: auto; font-size: 0.82rem; margin-top: 0; }
+        
+        table { width: 100%; border-collapse: separate; border-spacing: 0; margin-bottom: 15px; font-size: 0.8rem; }
+        th, td { padding: 10px 8px; text-align: left; border-bottom: 1px solid rgba(0,0,0,0.06); }
+        th { background-color: var(--primary); color: white; font-weight: 600; position: sticky; top: 0; z-index: 5; }
+        
+        .wadah-scroll-santri { max-height: 520px; overflow-y: auto; overflow-x: auto; border: 1px solid rgba(0,0,0,0.08); border-radius: 12px; background: #ffffff; margin-bottom: 10px; }
+        .hidden { display: none !important; }
+
+        #id-card-modal, #modal-scanner-login, #modal-sertifikat { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column; padding: 15px; }
+        
+        /* CSS ID CARD & LAINNYA */
+        .id-card-wrapper { width: 324px; height: 204px; background: rgba(255, 255, 255, 0.35); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.6); border-radius: 14px; overflow: hidden; position: relative; box-shadow: 0 15px 35px rgba(0,0,0,0.2); display: flex; flex-direction: column; margin: 0 auto; }
+        .id-card-wrapper.portrait { width: 204px; height: 324px; }
+        .id-card-wrapper::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 50%; background: linear-gradient(135deg, var(--primary), var(--primary-light)); clip-path: polygon(0 0, 100% 0, 100% 45%, 0% 100%); z-index: -2; }
+        .id-card-wrapper.portrait::before { height: 42%; clip-path: polygon(0 0, 100% 0, 100% 65%, 0% 100%); }
+        .id-card-wrapper::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 50%; background: var(--accent); clip-path: polygon(0 0, 100% 0, 100% 50%, 0% 105%); z-index: -3; }
+        .id-card-wrapper.portrait::after { height: 42%; clip-path: polygon(0 0, 100% 0, 100% 70%, 0% 105%); }
+
+        .id-header { background: transparent !important; color: white; border: none; padding: 12px 14px 8px 14px; display: flex; align-items: center; justify-content: flex-start; gap: 10px; }
+        .id-header img { width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.95); padding: 3px; object-fit: contain; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+        .id-header h4 { font-size: 0.85rem; margin: 0; line-height: 1.1; text-shadow: 1px 1px 3px rgba(0,0,0,0.4); }
+        .id-header p { font-size: 0.55rem; color: #F4E29F; margin: 0; text-shadow: 1px 1px 2px rgba(0,0,0,0.4); }
+        .id-body { display: flex; flex-direction: row; padding: 6px 14px 12px 14px; gap: 12px; flex: 1; align-items: center; background: transparent !important; }
+        .id-photo { width: 65px; height: 85px; object-fit: cover; border-radius: 10px; border: 2px solid rgba(255,255,255,0.9); background: #eee; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+        .id-details { flex: 1; text-align: left; font-size: 0.65rem; line-height: 1.4; color: #111; font-weight: bold; background: transparent !important; padding: 0 2px; border: none; box-shadow: none; }
+        .id-details strong { font-size: 0.85rem; color: var(--primary); display: block; margin-bottom: 2px; text-transform: uppercase; }
+        .id-qr-depan { width: auto; height: auto; min-width: 60px; min-height: 40px; padding: 3px; background: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-left: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.15); overflow: hidden; }
+
+        .tempat-teks-berjalan { width: 100%; overflow: hidden; white-space: nowrap; box-sizing: border-box; }
+        .teks-berjalan { display: inline-block; padding-left: 100%; animation: geserKiri 15s linear infinite; }
+        @keyframes geserKiri { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
+    </style>
+</head>
+<body>
+
+<div id="splash-screen" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.95); backdrop-filter:blur(20px); z-index:999999; display:flex; flex-direction:column; align-items:center; justify-content:center; transition:opacity 0.6s ease, visibility 0.6s ease;">
+    <img id="splash-logo" src="https://cdn-icons-png.flaticon.com/512/3592/3592078.png" style="width:110px; height:110px; border-radius:24px; box-shadow:0 15px 35px rgba(0,0,0,0.2);">
+    <h2 id="splash-title" style="margin-top:20px; color:var(--primary); font-weight:800; text-transform:uppercase; letter-spacing:2px; font-size:1.2rem;">Memuat...</h2>
+</div>
+
+<div class="app-container" id="main-app-container">
+    <header id="app-header" class="hidden">
+        <div class="header-top">
+            <img src="https://cdn-icons-png.flaticon.com/512/3592/3592078.png" id="header-logo" class="header-logo" alt="Logo">
+            <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; overflow: hidden;">
+                <div class="tempat-teks-berjalan">
+                    <h1 id="yayasan-name-pondok" class="teks-berjalan" style="font-size: 0.9rem; margin: 0; color: #ffffff; font-weight: 600;">View Santri Lite</h1>
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+                <div class="user-profile-btn" onclick="document.getElementById('profile-dropdown-menu').classList.toggle('hidden')">
+                    <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" id="header-user-photo" alt="Foto Profile">
+                    <span id="header-user-name">Admin</span>
+                    <i class="fa-solid fa-caret-down"></i>
+                </div>
+                <div id="profile-dropdown-menu" class="profile-dropdown-menu hidden">
+                    <div class="dropdown-item" onclick="sinkronisasiKeCloud()" style="color:var(--info);"><i class="fa-solid fa-cloud-arrow-up"></i><span>Kirim ke Cloud</span></div>
+                    <div class="dropdown-item" onclick="tarikDataDariSupabase()" style="color:var(--warning);"><i class="fa-solid fa-cloud-arrow-down"></i><span>Tarik dari Cloud</span></div>
+                    <div class="dropdown-item" onclick="prosesLogout()" style="color:var(--danger);"><i class="fa-solid fa-right-from-bracket"></i><span>Keluar Akun</span></div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main id="app-content">
+        <!-- ══ LOGIN VIEW ══ -->
+        <div id="view-login" class="page-view login-wrapper" style="background-image: url('https://images.unsplash.com/photo-1519817650390-28a59b20892c?q=80&w=1000&auto=format&fit=crop');">
+            <div class="login-overlay"></div>
+            <div class="card glass-card-login">
+                <div style="text-align: center; margin-bottom: 14px;">
+                    <img src="https://cdn-icons-png.flaticon.com/512/3592/3592078.png" id="login-logo" style="width: 110px; height: 110px; border-radius: 50%; border: 3px solid var(--accent); padding: 5px; background: rgba(255,255,255,0.85); box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+                    <h2 style="font-weight: 800; margin-top:8px;" id="login-pondok-name">Sistem Manajemen</h2>
+                    <p style="color: rgba(255,255,255,0.8); font-size: 0.72rem; margin-top: 2px;">Silakan masuk (Versi Lite)</p>
+                </div>
+                
+                <div id="login-error" class="hidden" style="color: white; background: rgba(255,59,48,0.8); padding: 6px; border-radius: 10px; text-align: center; font-size: 0.75rem; margin-bottom: 10px;">
+                    Kredensial atau PIN Salah!
+                </div>
+
+                <div style="display:flex; gap:8px; margin-bottom: 12px; justify-content:center;">
+                    <button type="button" id="tab-btn-pin" class="btn-primary" style="margin:0; padding:8px 12px; font-size:0.75rem; border-radius:15px; width:auto;" onclick="switchModeLogin('pin')"><i class="fa-solid fa-key"></i> Mode PIN</button>
+                    <button type="button" id="tab-btn-user" class="btn-outline" style="margin:0; padding:8px 12px; font-size:0.75rem; border-radius:15px; border-color:rgba(255,255,255,0.4); color:white; width:auto;" onclick="switchModeLogin('user')"><i class="fa-solid fa-user"></i> Username</button>
+                </div>
+
+                <div id="login-area-pin">
+                    <input type="password" inputmode="numeric" pattern="[0-9]*" id="login-pin-input" maxlength="6" placeholder="Masukkan PIN..." style="text-align: center; font-weight: bold; letter-spacing: 4px; font-size: 1.1rem;">
+                    <button class="btn-primary" onclick="prosesLoginPIN()" style="font-size: 0.88rem; padding: 12px; border-radius: 12px; margin-top: 5px;">MASUK DENGAN PIN</button>
+                </div>
+
+                <div id="login-area-user" class="hidden">
+                    <input type="text" id="login-username" placeholder="Masukkan Username...">
+                    <input type="password" id="login-password" placeholder="Masukkan Password...">
+                    <button class="btn-primary" onclick="prosesLogin()" style="font-size: 0.88rem; padding: 12px; border-radius: 12px; margin-top: 5px;">MASUK SISTEM</button>
+                </div>
+                
+                <div style="display:flex; justify-content:center; margin-top: 5px;">
+                    <button class="btn-outline" style="background: transparent; color: rgba(255,255,255,0.7); border: none; font-size:0.7rem; width:auto; text-decoration: underline;" onclick="bukaScannerLoginTarikData()">
+                        <i class="fa-solid fa-qrcode"></i> QR Tarik dari Cloud
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ VIEW SANTRI (UTAMA) ══ -->
+        <div id="view-santri" class="hidden page-view" style="padding: 15px;">
+            <div style="display: flex; gap: 8px; margin-bottom: 14px;">
+                <button type="button" id="btn-tab-santri-aktif" class="btn-primary" style="flex: 1; margin: 0; padding: 12px; font-size: 0.8rem;" onclick="switchTabSantri('aktif')">
+                    <i class="fa-solid fa-user-graduate"></i> Santri (<span id="count-santri-aktif">0</span>)
+                </button>
+                <button type="button" id="btn-tab-santri-alumni" class="btn-outline" style="flex: 1; margin: 0; padding: 12px; font-size: 0.8rem; justify-content: center;" onclick="switchTabSantri('alumni')">
+                    <i class="fa-solid fa-award"></i> Alumni (<span id="count-santri-alumni">0</span>)
+                </button>
+            </div>
+
+            <!-- Form Registrasi -->
+            <div class="card card-premium" id="card-registrasi-santri">
+                <h3 id="form-santri-title" style="margin-bottom: 14px; color: var(--primary);">Tambah Santri</h3>
+                <input type="hidden" id="edit-id-santri" value="">
+                
+                <label id="label-foto-santri">Foto</label>
+                <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+                    <button type="button" class="btn-outline" style="flex: 1; justify-content: center; margin: 0; padding: 10px;" onclick="document.getElementById('input-foto-kamera').click()"><i class="fa-solid fa-camera"></i> Kamera</button>
+                    <button type="button" class="btn-outline" style="flex: 1; justify-content: center; margin: 0; padding: 10px;" onclick="document.getElementById('input-foto-galeri').click()"><i class="fa-solid fa-image"></i> Galeri</button>
+                </div>
+
+                <input type="file" id="input-foto-kamera" accept="image/*" capture="environment" class="hidden" onchange="previewFotoSantri(event)">
+                <input type="file" id="input-foto-galeri" accept="image/*" class="hidden" onchange="previewFotoSantri(event)">
+                <img id="preview-foto-santri-ui" src="" style="max-width: 90px; display: none; border-radius: 10px; border: 2px solid var(--accent); margin-bottom: 10px;">
+                
+                <label>NIK</label><input type="number" id="input-nik-santri" placeholder="16 Digit NIK...">
+                <label>Nama Lengkap</label><input type="text" id="input-nama-santri" placeholder="Nama lengkap sesuai KK...">
+                <label>Alamat</label><textarea id="input-alamat-santri" rows="2"></textarea>
+                
+                <div style="display: flex; gap: 8px;">
+                    <div style="flex: 1;">
+                        <label id="label-asrama-input">Asrama</label>
+                        <select id="input-asrama-santri"><option value="Putra">Asrama Putra</option><option value="Putri">Asrama Putri</option></select>
+                    </div>
+                    <div style="flex: 1;">
+                        <label id="label-kamar-input">Kamar</label><input type="text" id="input-kamar-santri" placeholder="Cth: A-01">
+                    </div>
+                </div>
+
+                <button class="btn-primary" id="btn-simpan-santri" onclick="simpanSantri()">SIMPAN DATA & GENERATE NIS</button>
+                <button class="btn-outline hidden" id="btn-batal-edit-santri" onclick="batalEditSantri()" style="border-color: var(--danger); color: var(--danger);">BATAL EDIT</button>
+            </div>
+            
+            <!-- Tabel Database Santri -->
+            <div class="card">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h3 id="title-db-santri" style="color: var(--primary); margin: 0;">Data Santri</h3>
+                </div>
+
+                <div style="margin-bottom: 12px; margin-top: 10px; position: relative;">
+                    <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #888;"></i>
+                    <input type="text" id="input-search-santri" onkeyup="cariDataSantri()" placeholder="Ketik nama, NIS, atau kamar santri..." style="width: 100%; padding: 12px 15px 12px 38px; border-radius: 12px; font-size: 0.85rem; margin-bottom:0;">
+                </div>
+
+                <div id="wadah-scroll-santri" class="wadah-scroll-santri">
+                    <table>
+                        <thead><tr><th id="th-kamar-nis">NIS / Kamar</th><th>Nama Lengkap</th><th>Aksi</th></tr></thead>
+                        <tbody id="tabel-santri-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- ═══ MODAL AREA ═══ -->
+<div id="modal-scanner-login" class="hidden">
+    <div class="glass-panel" style="padding: 24px; border-radius: var(--radius-md); text-align:center; width: 92%; max-width: 400px;">
+        <h3 style="color:var(--primary); margin-bottom:10px; font-size:1rem;">Arahkan ke QR Super Admin</h3>
+        <div id="qr-reader-login" style="margin-bottom:14px; display:none;"></div>
+        <button class="btn-danger" onclick="tutupScannerLoginTarikData()" style="width: 100%;">Batal</button>
+    </div>
+</div>
+
+<div id="id-card-modal" class="hidden">
+    <div class="glass-panel" style="padding: 24px; border-radius: var(--radius-md); text-align:center; width: 92%; max-width: 420px;">
+        <h3 style="color:var(--primary); margin-bottom:14px; font-weight:800;">Preview Kartu Identitas</h3>
+        
+        <div class="id-card-wrapper" id="area-cetak-kartu">
+            <div id="sisi-depan-kartu">
+                <div class="id-header">
+                    <img src="" id="card-logo">
+                    <div><h4 id="card-pondok">Nama Instansi</h4><p id="card-yayasan">Nama Yayasan</p></div>
+                </div>
+                <div class="id-body" id="card-body-container">
+                    <img src="" id="card-foto" class="id-photo">
+                    <div class="id-details">
+                        <strong id="card-nama">NAMA LENGKAP</strong>
+                        <div style="margin-top: 5px;">
+                            <span style="display:inline-block; width: 38px;">NIS</span>: <span id="card-nis" style="font-weight: bold; color: var(--primary);"></span><br>
+                            <span id="card-alamat"></span>
+                            <div style="display: none;">
+                                <span id="label-nomor"></span><span id="label-asrama"></span> <span id="card-asrama"></span>
+                                <span id="label-kamar"></span> <span id="card-kamar"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="id-qr-depan">
+                        <svg id="card-barcode" style="width: 100%;"></svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top: 22px; display:flex; gap:10px;">
+            <button class="btn-outline" onclick="document.getElementById('id-card-modal').classList.add('hidden')" style="flex:1;">Tutup</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ==========================================
+    // 1. INISIALISASI DATABASE & STATE (Persis Sama)
+    // ==========================================
+    window.dbCache = {}; 
+    const KODE_RAHASIA_SYNC = "SYNC_PONDOK_SUPABASE_ENTERPRISE_V1";
+    let currentUser = null, scannerLoginData = null;
+    let tempFotoSantriBase64 = ''; 
+    let modeTampilanSantri = 'aktif';
+    let supabaseConfig = { url: '', key: '' };
+
+    async function getDB(key, fallback = null) { 
+        if (window.dbCache[key] !== undefined && window.dbCache[key] !== null) return window.dbCache[key];
+        return fallback; 
+    }
+
+    async function setDB(key, dataObj) {
+        window.dbCache[key] = dataObj; 
+        return await localforage.setItem(key, dataObj); 
+    }
+
+    async function initApp() {
+        const splashTitle = document.getElementById('splash-title');
+        if(splashTitle) splashTitle.innerText = "Memuat Database...";
+
+        try {
+            const keys = await localforage.keys();
+            for (let key of keys) { window.dbCache[key] = await localforage.getItem(key); }
+            supabaseConfig = await getDB('pondok_supabase_config', { url: '', key: '' });
+        } catch (err) { console.error("Gagal load dari IndexedDB:", err); }
+
+        setTimeout(() => {
+            const splash = document.getElementById('splash-screen');
+            if(splash) { splash.style.opacity = '0'; setTimeout(() => splash.style.display = 'none', 600); }
+        }, 500);
+
+        if (!window.dbCache['pondok_santri']) setDB('pondok_santri', []);
+        
+        // Cek Sesi Aktif
+        const savedSession = await getDB('pondok_active_user', null);
+        if (savedSession && savedSession.role) { 
+            currentUser = savedSession; 
+            masukKeSistemSetelahLogin(); 
+        }
+    }
+
+    // ==========================================
+    // 2. LOGIKA LOGIN (Route paksa ke View Santri)
+    // ==========================================
+    function switchModeLogin(mode) {
+        document.getElementById('login-error').classList.add('hidden');
+        if (mode === 'pin') {
+            document.getElementById('login-area-pin').classList.remove('hidden');
+            document.getElementById('login-area-user').classList.add('hidden');
+            document.getElementById('tab-btn-pin').className = 'btn-primary';
+            document.getElementById('tab-btn-user').className = 'btn-outline';
+            document.getElementById('tab-btn-user').style.color = 'white';
+        } else {
+            document.getElementById('login-area-pin').classList.add('hidden');
+            document.getElementById('login-area-user').classList.remove('hidden');
+            document.getElementById('tab-btn-pin').className = 'btn-outline';
+            document.getElementById('tab-btn-pin').style.color = 'white';
+            document.getElementById('tab-btn-user').className = 'btn-primary';
+        }
+    }
+
+    async function prosesLoginPIN() {
+        const pinVal = document.getElementById('login-pin-input').value.trim();
+        let users = await getDB('pondok_users', []);
+        let matchedUser = users.find(u => u.pin_login && u.pin_login === pinVal);
+        if (matchedUser) {
+            currentUser = matchedUser;
+            await setDB('pondok_active_user', currentUser); 
+            masukKeSistemSetelahLogin();
+        } else { 
+            document.getElementById('login-error').classList.remove('hidden'); 
+            document.getElementById('login-pin-input').value = ""; 
+        }
+    }
+
+    async function prosesLogin() { 
+        const usernameInput = document.getElementById('login-username').value; 
+        const passwordInput = document.getElementById('login-password').value; 
+        let users = await getDB('pondok_users', []); 
+        currentUser = users.find(user => user.username === usernameInput && user.password === passwordInput); 
+        if (currentUser) { 
+            await setDB('pondok_active_user', currentUser); 
+            masukKeSistemSetelahLogin(); 
+        } else { 
+            document.getElementById('login-error').classList.remove('hidden'); 
+        } 
+    }
+
+    function masukKeSistemSetelahLogin() {
+        document.getElementById('header-user-name').innerText = currentUser.nama || "User";
+        document.getElementById('header-user-photo').src = currentUser.foto || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+        
+        document.getElementById('view-login').classList.add('hidden'); 
+        document.getElementById('app-header').classList.remove('hidden'); 
+        
+        // PENTING: Bypass menu lain, langsung panggil view-santri
+        document.getElementById('view-santri').classList.remove('hidden');
+        switchTabSantri('aktif'); 
+    }
+
+    function prosesLogout() { 
+        localforage.removeItem('pondok_active_user').then(() => {
+            window.dbCache = {};
+            location.reload(); 
+        });
+    }
+
+    // ==========================================
+    // 3. LOGIKA CRUD SANTRI (Persis Sama)
+    // ==========================================
+    function kompresiGambar(fileImage, maxLebar, callbackSelesai) {
+        if(!fileImage) return callbackSelesai(''); 
+        const readerData = new FileReader(); readerData.readAsDataURL(fileImage);
+        readerData.onload = (eventReader) => {
+            const objekGambar = new Image(); objekGambar.src = eventReader.target.result;
+            objekGambar.onload = () => { 
+                const elemenCanvas = document.createElement('canvas'); 
+                const rasioSkala = maxLebar / objekGambar.width; 
+                if(objekGambar.width < maxLebar) { elemenCanvas.width = objekGambar.width; elemenCanvas.height = objekGambar.height; } 
+                else { elemenCanvas.width = maxLebar; elemenCanvas.height = objekGambar.height * rasioSkala; } 
+                const konteks = elemenCanvas.getContext('2d'); 
+                konteks.drawImage(objekGambar, 0, 0, elemenCanvas.width, elemenCanvas.height); 
+                callbackSelesai(elemenCanvas.toDataURL('image/png')); 
+            }
+        }
+    }
+
+    function previewFotoSantri(event) { 
+        const file = event.target.files[0]; 
+        if (!file) return; 
+        const btnSimpan = document.getElementById('btn-simpan-santri');
+        if (btnSimpan) { btnSimpan.disabled = true; btnSimpan.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> MEMPROSES...'; }
+
+        kompresiGambar(file, 150, (base64Hasil) => { 
+            tempFotoSantriBase64 = base64Hasil; 
+            const imgPreview = document.getElementById('preview-foto-santri-ui'); 
+            imgPreview.src = base64Hasil; imgPreview.style.display = 'block'; 
+            if (btnSimpan) { btnSimpan.disabled = false; btnSimpan.innerText = document.getElementById('edit-id-santri').value !== "" ? "UPDATE DATA" : "SIMPAN DATA"; }
+        }); 
+    }
+
+    function switchTabSantri(mode) {
+        modeTampilanSantri = mode;
+        document.getElementById('btn-tab-santri-aktif').className = mode === 'aktif' ? 'btn-primary' : 'btn-outline';
+        document.getElementById('btn-tab-santri-alumni').className = mode === 'alumni' ? 'btn-primary' : 'btn-outline';
+        document.getElementById('card-registrasi-santri').style.display = mode === 'aktif' ? 'block' : 'none';
+        document.getElementById('th-kamar-nis').innerText = mode === 'aktif' ? 'NIS / Kamar' : 'NIS / Thn Lulus';
+        renderTabelSantri();
+    }
+
+    async function simpanSantri() { 
+        const idEdit = document.getElementById('edit-id-santri').value; 
+        const namaLengkap = document.getElementById('input-nama-santri').value; 
+        const nomorKamar = document.getElementById('input-kamar-santri').value; 
+        const alamatAsal = document.getElementById('input-alamat-santri').value; 
+        const pilihanAsrama = document.getElementById('input-asrama-santri').value; 
+        const nikSantri = document.getElementById('input-nik-santri').value;
+
+        if(!namaLengkap || !nomorKamar) return alert("Nama Lengkap & Kamar Wajib Diisi!"); 
+        let databaseSantri = await getDB('pondok_santri', []); 
+        let fotoBase64Hasil = tempFotoSantriBase64; 
+
+        if(idEdit) { 
+            const index = databaseSantri.findIndex(s => s.id == idEdit); 
+            if(index !== -1) { 
+                databaseSantri[index].nama = namaLengkap; 
+                databaseSantri[index].kamar = nomorKamar; 
+                databaseSantri[index].alamat = alamatAsal; 
+                databaseSantri[index].asrama = pilihanAsrama; 
+                databaseSantri[index].nik = nikSantri; 
+                if(fotoBase64Hasil !== '') databaseSantri[index].foto = fotoBase64Hasil; 
+            } 
+            alert("Data Berhasil Diperbarui!"); 
+        } else { 
+            const nisTerbentuk = new Date().getFullYear().toString().slice(-2) + String(Date.now()).slice(-4); 
+            if(fotoBase64Hasil === '') fotoBase64Hasil = 'https://cdn-icons-png.flaticon.com/512/847/847969.png'; 
+            databaseSantri.push({ id: Date.now(), nis: nisTerbentuk, nik: nikSantri, nama: namaLengkap, alamat: alamatAsal, asrama: pilihanAsrama, kamar: nomorKamar, foto: fotoBase64Hasil, is_alumni: false }); 
+            alert(`Registrasi Berhasil!\nNIS: ${nisTerbentuk}`); 
+        } 
+
+        await setDB('pondok_santri', databaseSantri); 
+        batalEditSantri(); 
+        renderTabelSantri(); 
+    }
+
+    function batalEditSantri() { 
+        document.getElementById('edit-id-santri').value = ""; 
+        document.getElementById('input-nama-santri').value = ""; 
+        document.getElementById('input-nik-santri').value = ""; 
+        document.getElementById('input-kamar-santri').value = ""; 
+        document.getElementById('input-alamat-santri').value = ""; 
+        document.getElementById('preview-foto-santri-ui').style.display = "none"; 
+        tempFotoSantriBase64 = ''; 
+        document.getElementById('form-santri-title').innerText = "Tambah Santri"; 
+        document.getElementById('btn-simpan-santri').innerText = "SIMPAN DATA"; 
+        document.getElementById('btn-batal-edit-santri').classList.add('hidden'); 
+    }
+
+    async function editSantriMode(idString) { 
+        let db = await getDB('pondok_santri', []); 
+        let santri = db.find(s => s.id == idString); 
+        if(!santri) return; 
+        document.getElementById('edit-id-santri').value = santri.id; 
+        document.getElementById('input-nama-santri').value = santri.nama; 
+        document.getElementById('input-nik-santri').value = santri.nik || ''; 
+        document.getElementById('input-kamar-santri').value = santri.kamar; 
+        document.getElementById('input-alamat-santri').value = santri.alamat; 
+        document.getElementById('input-asrama-santri').value = santri.asrama; 
+        document.getElementById('form-santri-title').innerText = `Edit Data Santri`; 
+        document.getElementById('btn-simpan-santri').innerText = "UPDATE DATA"; 
+        document.getElementById('btn-batal-edit-santri').classList.remove('hidden'); 
+        window.scrollTo(0,0); 
+    }
+
+    async function hapusSantri(idSantri) {
+        if (!confirm(`Yakin ingin menghapus data santri ini?`)) return;
+        let dbSantri = await getDB('pondok_santri', []);
+        let sisaSantri = dbSantri.filter(s => s.id != idSantri);
+        await setDB('pondok_santri', sisaSantri);
+        
+        let tombstones = await getDB('pondok_tombstone_santri', []);
+        tombstones.push(idSantri);
+        await setDB('pondok_tombstone_santri', tombstones);
+        
+        renderTabelSantri();
+    }
+
+    async function renderTabelSantri() { 
+        let databaseSantri = await getDB('pondok_santri', []);
+        const keyword = (document.getElementById('input-search-santri').value || '').toLowerCase();
+        
+        const dataDitampilkan = databaseSantri.filter(s => {
+            let matchStatus = modeTampilanSantri === 'alumni' ? s.is_alumni : !s.is_alumni;
+            let matchSearch = s.nama.toLowerCase().includes(keyword) || s.nis.includes(keyword) || s.kamar.toLowerCase().includes(keyword);
+            return matchStatus && matchSearch;
+        });
+
+        document.getElementById(modeTampilanSantri === 'aktif' ? 'count-santri-aktif' : 'count-santri-alumni').innerText = dataDitampilkan.length;
+
+        const elemenTbody = document.getElementById('tabel-santri-body');
+        elemenTbody.innerHTML = ''; 
+
+        if(dataDitampilkan.length === 0) return elemenTbody.innerHTML = `<tr><td colspan="3" align="center">Belum ada data.</td></tr>`; 
+
+        dataDitampilkan.forEach(s => {
+            elemenTbody.innerHTML += `<tr>
+                <td><strong>${s.nis}</strong><br><span style="font-size:0.65rem; color:var(--text-muted);">${modeTampilanSantri === 'aktif' ? s.kamar : s.tahun_lulus}</span></td>
+                <td>${s.nama}</td>
+                <td>
+                    <div style="display:flex; gap:4px; flex-wrap:wrap;">
+                        <button class="btn-print" style="margin:0; padding:6px; font-size:0.7rem;" onclick="prosesCetakIDCard('${s.nis}')">Kartu</button>
+                        ${modeTampilanSantri === 'aktif' ? `<button class="btn-warning" style="margin:0; padding:6px; font-size:0.7rem;" onclick="editSantriMode(${s.id})">Edit</button>` : ''}
+                        <button class="btn-danger" style="margin:0; padding:6px; font-size:0.7rem;" onclick="hapusSantri(${s.id})">Hapus</button>
+                    </div>
+                </td>
+            </tr>`;
+        }); 
+    }
+
+    function cariDataSantri() { renderTabelSantri(); }
+
+    // ==========================================
+    // 4. KONEKSI CLOUD / TARIK DATA (Persis Sama)
+    // ==========================================
+    function bukaScannerLoginTarikData() {
+        if (typeof Html5Qrcode === 'undefined') return alert("Library Scanner belum siap.");
+        document.getElementById('qr-reader-login').style.display = 'block';
+        document.getElementById('modal-scanner-login').classList.remove('hidden');
+        if (!scannerLoginData) {
+            scannerLoginData = new Html5Qrcode("qr-reader-login");
+            scannerLoginData.start({ facingMode: "environment" }, { fps: 15, qrbox: { width: 220, height: 220 } }, async (res) => {
+                try {
+                    const obj = JSON.parse(res);
+                    if (obj.code === KODE_RAHASIA_SYNC) {
+                        supabaseConfig = { url: obj.url, key: obj.key };
+                        await setDB('pondok_supabase_config', supabaseConfig);
+                        tutupScannerLoginTarikData();
+                        alert("Berhasil menghubungkan server! Menyiapkan sinkronisasi cloud...");
+                        tarikDataDariSupabase();
+                    }
+                } catch(e) { alert("Format Barcode tidak dikenali."); }
+            }).catch(() => { alert("Gagal membuka kamera scan."); tutupScannerLoginTarikData(); });
+        }
+    }
+
+    function tutupScannerLoginTarikData() {
+        if (scannerLoginData) {
+            scannerLoginData.stop().then(() => {
+                document.getElementById('qr-reader-login').style.display = 'none';
+                document.getElementById('modal-scanner-login').classList.add('hidden');
+                scannerLoginData = null;
+            });
+        }
+    }
+
+    function gabungDataArray(arrayLokal, arrayCloud, primaryKey) {
+        if (!arrayCloud) return arrayLokal || [];
+        if (!arrayLokal) return arrayCloud || [];
+        let mapData = new Map();
+        arrayCloud.forEach(item => { if (item[primaryKey]) mapData.set(item[primaryKey], item); });
+        arrayLokal.forEach(itemLokal => {
+            if (itemLokal[primaryKey]) {
+                let itemCloud = mapData.get(itemLokal[primaryKey]);
+                if (itemCloud && itemLokal.foto && !itemCloud.foto) itemCloud.foto = itemLokal.foto;
+                mapData.set(itemLokal[primaryKey], Object.assign({}, itemCloud || {}, itemLokal));
+            }
+        });
+        return Array.from(mapData.values());
+    }
+
+    async function tarikDataDariSupabase() {
+        if (!supabaseConfig.url || !supabaseConfig.key) return alert('Konfigurasi URL & Key Supabase belum tersedia.');
+        try {
+            const response = await fetch(`${supabaseConfig.url}/rest/v1/backup_lms?id=eq.1&select=data_json`, {
+                headers: { 'apikey': supabaseConfig.key, 'Authorization': `Bearer ${supabaseConfig.key}` }
+            });
+            const rows = await response.json();
+            if (rows && rows.length > 0 && rows[0].data_json) {
+                const data = rows[0].data_json;
+                // Simpan SEMUA data (agar struktur cloud utuh saat kita kirim balik)
+                if (data.santri) await setDB('pondok_santri', data.santri);
+                if (data.users) await setDB('pondok_users', data.users);
+                if (data.yayasan) await setDB('pondok_yayasan', data.yayasan);
+                // Biarkan tabel lain (kelas, absen) ikut tersimpan utuh di IndexedDB background.
+                alert("Berhasil Menarik Data dari Cloud! Sistem akan memuat ulang.");
+                location.reload();
+            }
+        } catch (err) { alert("Gagal menarik data dari server. Periksa jaringan internet."); }
+    }
+
+    async function sinkronisasiKeCloud() {
+        if (!supabaseConfig.url || !supabaseConfig.key) return alert("Konfigurasi belum diisi.");
+        try {
+            const resCloud = await fetch(`${supabaseConfig.url}/rest/v1/backup_lms?id=eq.1&select=data_json,updated_at`, { headers: { 'apikey': supabaseConfig.key, 'Authorization': `Bearer ${supabaseConfig.key}` } });
+            const rows = await resCloud.json();
+            let dataCloud = (rows.length > 0) ? rows[0].data_json : {};
+            let cloudUpdatedAt = (rows.length > 0) ? rows[0].updated_at : null;
+
+            // Merging HANYA Santri & Users, yang lain oper balik dataCloud
+            const payloadMerged = {
+                santri: gabungDataArray(await getDB('pondok_santri', []), dataCloud.santri, 'id'),
+                users: gabungDataArray(await getDB('pondok_users', []), dataCloud.users, 'username'),
+                // Pertahankan tabel utuh milik aplikasi utama
+                kelas: dataCloud.kelas || [], mapel: dataCloud.mapel || [], absensi: dataCloud.absensi || [], tagihan: dataCloud.tagihan || [], tabungan: dataCloud.tabungan || [], yayasan: dataCloud.yayasan || {}, izin_aktif: dataCloud.izin_aktif || []
+            };
+
+            const waktuKirim = new Date().toISOString();
+            await fetch(`${supabaseConfig.url}/rest/v1/backup_lms?id=eq.1`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json', 'apikey': supabaseConfig.key, 'Authorization': `Bearer ${supabaseConfig.key}`, 'Prefer': 'return=representation' },
+                body: JSON.stringify({ data_json: payloadMerged, updated_at: waktuKirim })
+            });
+
+            alert("Sinkronisasi Sukses!");
+        } catch (err) { alert("Koneksi Terputus!"); }
+    }
+
+    // ==========================================
+    // 5. CETAK ID CARD & PWA (Persis Sama)
+    // ==========================================
+    async function prosesCetakIDCard(identifier) { 
+        const yayasan = await getDB('pondok_yayasan', {}); 
+        const card = document.getElementById('area-cetak-kartu'); 
+        card.style.backgroundImage = yayasan.bg_idcard ? `url('${yayasan.bg_idcard}')` : `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" opacity="0.05"><circle cx="50" cy="50" r="40" stroke="%2304432A" stroke-width="2" fill="none"/></svg>')`; 
+        document.getElementById('card-logo').src = yayasan.logo || "https://cdn-icons-png.flaticon.com/512/3592/3592078.png"; 
+        document.getElementById('card-pondok').innerText = yayasan.pondok || "Sistem Manajemen"; 
+        document.getElementById('card-yayasan').innerText = yayasan.yayasan || "Instansi"; 
+
+        let db = await getDB('pondok_santri', []); let s = db.find(x => x.nis === identifier); if(!s) return; 
+        document.getElementById('card-foto').src = s.foto || ""; 
+        document.getElementById('card-nama').innerText = s.nama; 
+        document.getElementById('label-nomor').innerText = "NIS:"; document.getElementById('card-nis').innerText = s.nis; 
+        document.getElementById('card-alamat').innerText = (s.alamat || '-'); 
+        
+        let qrDataPayload = "https://ahmadfd-afk.github.io/Wali-santri/?nis=" + s.nis;
+        if (typeof JsBarcode !== 'undefined') {
+            JsBarcode("#card-barcode", s.nis, { format: "CODE128", width: 2.2, height: 30, displayValue: false, background: "transparent" });
+        }
+        document.getElementById('id-card-modal').classList.remove('hidden'); 
+    }
+
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js').then((reg) => {
+            console.log('PWA Service Worker berhasil terdaftar Lite:', reg.scope);
+        }).catch((err) => console.error('Pendaftaran SW gagal:', err));
+    }
+
+    // Eksekusi Inisialisasi
+    initApp();
+</script>
+
+</body>
+</html>
