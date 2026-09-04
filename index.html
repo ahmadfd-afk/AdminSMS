@@ -51,6 +51,18 @@
         .glass-panel { background: var(--glass-card); backdrop-filter: blur(40px) saturate(200%); -webkit-backdrop-filter: blur(40px) saturate(200%); border: 1px solid var(--glass-border); box-shadow: var(--glass-shadow); }
         .login-wrapper { background-size: cover; background-position: center; min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 15px; position: relative; z-index: 10; width: 100%; }
         .login-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.45); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); z-index: -1; transition: all 0.3s ease; }
+        
+        /* ══ PENCEGAH TEKS TERBLOKIR SAAT DISENTUH ══ */
+        .user-profile-btn, .dropdown-item, button, .header-top h1, .header-top span {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        /* ═══════════════════════════════════════════ */
+
         .glass-card-login { background: rgba(255, 255, 255, 0.15) !important; backdrop-filter: blur(40px) saturate(200%); -webkit-backdrop-filter: blur(40px) saturate(200%); border: 1px solid rgba(255, 255, 255, 0.28) !important; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4) !important; border-radius: 28px; padding: 20px 18px !important; width: 100%; max-width: 330px; }
         .glass-card-login h2 { color: #ffffff !important; text-shadow: 0 2px 8px rgba(0,0,0,0.3); font-size: 1.1rem; }
         .glass-card-login input, .glass-card-login select { background: rgba(255, 255, 255, 0.9) !important; border: 1px solid rgba(255,255,255,0.6); position: relative; z-index: 50; border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; font-size: 0.95rem; }
@@ -305,9 +317,8 @@
     let supabaseConfig = { url: '', key: '' };
     let isSyncing = false; 
 
-    // --- FUNGSI LOADING OVERLAY BARU ---
     function showLoadingOverlay(tipe) {
-        document.getElementById('profile-dropdown-menu').classList.add('hidden'); // Tutup dropdown
+        document.getElementById('profile-dropdown-menu').classList.add('hidden');
         const overlay = document.getElementById('global-loading-overlay');
         const icon = document.getElementById('loading-icon');
         const title = document.getElementById('loading-title');
@@ -331,7 +342,6 @@
     function hideLoadingOverlay() {
         document.getElementById('global-loading-overlay').classList.add('hidden');
     }
-    // ------------------------------------
 
     async function getDB(key, fallback = null) { 
         if (window.dbCache[key] !== undefined && window.dbCache[key] !== null) return window.dbCache[key];
