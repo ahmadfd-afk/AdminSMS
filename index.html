@@ -136,8 +136,8 @@
                     <i class="fa-solid fa-caret-down"></i>
                 </div>
                 <div id="profile-dropdown-menu" class="profile-dropdown-menu hidden">
-                    <div class="dropdown-item" onclick="sinkronisasiKeCloud()" style="color:var(--info);"><i class="fa-solid fa-cloud-arrow-up"></i><span>Kirim ke Cloud</span></div>
-                    <div class="dropdown-item" onclick="tarikDataDariSupabase()" style="color:var(--warning);"><i class="fa-solid fa-cloud-arrow-down"></i><span>Tarik dari Cloud</span></div>
+                    <div class="dropdown-item" onclick="sinkronisasiKeCloud()" style="color:var(--info);"><i class="fa-solid fa-cloud-arrow-up"></i><span id="text-sync-up">Kirim ke Cloud</span></div>
+                    <div class="dropdown-item" onclick="tarikDataDariSupabase()" style="color:var(--warning);"><i class="fa-solid fa-cloud-arrow-down"></i><span id="text-sync-down">Tarik dari Cloud</span></div>
                     <div class="dropdown-item" onclick="prosesLogout()" style="color:var(--danger);"><i class="fa-solid fa-right-from-bracket"></i><span>Keluar Akun</span></div>
                 </div>
             </div>
@@ -304,6 +304,7 @@
     let tempFotoSantriBase64 = ''; 
     let modeTampilanSantri = 'aktif';
     let supabaseConfig = { url: '', key: '' };
+    let isSyncing = false; // Pengaman double klik
 
     async function getDB(key, fallback = null) { 
         if (window.dbCache[key] !== undefined && window.dbCache[key] !== null) return window.dbCache[key];
@@ -638,50 +639,138 @@
     }
 
     async function tarikDataDariSupabase() {
+        if (isSyncing) return;
         if (!supabaseConfig.url || !supabaseConfig.key) return alert('Konfigurasi URL & Key Supabase belum tersedia.');
+        
+        isSyncing = true;
+        const textSyncDown = document.getElementById('text-sync-down');
+        if (textSyncDown) textSyncDown.innerText = "MEMULAI UNDUHAN...";
+
         try {
-            const response = await fetch(`${supabaseConfig.url}/rest/v1/backup_lms?id=eq.1&select=data_json`, {
-                headers: { 'apikey': supabaseConfig.key, 'Authorization': `Bearer ${supabaseConfig.key}` }
+            return new Promise((resolve, reject) => {
+                const xhr = new XMLHttpRequest();
+                xhr.open('GET', `${supabaseConfig.url}/rest/v1/backup_lms?id=eq.1&select=data_json`, true);
+                xhr.setRequestHeader('apikey', supabaseConfig.key);
+                xhr.setRequestHeader('Authorization', `Bearer ${supabaseConfig.key}`);
+
+                xhr.onprogress = (event) => {
+                    if (event.lengthComputable) {
+                        let persen = Math.round((event.loaded / event.total) * 100);
+                        if (textSyncDown) textSyncDown.innerText = `MENGUNDUH (${persen}%)`;
+                    } else {
+                        if (textSyncDown) textSyncDown.innerText = `MENGUNDUH...`;
+                    }
+                };
+
+                xhr.onload = async () => {
+                    if (textSyncDown) textSyncDown.innerText = "Tarik dari Cloud";
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        const rows = JSON.parse(xhr.responseText || "[]");
+                        if (rows && rows.length > 0 && rows[0].data_json) {
+                            const data = rows[0].data_json;
+                            // Simpan SEMUA data secara penuh di IndexedDB
+                            if (data.santri) await setDB('pondok_santri', data.santri);
+                            if (data.users) await setDB('pondok_users', data.users);
+                            if (data.yayasan) await setDB('pondok_yayasan', data.yayasan);
+                            
+                            alert("Berhasil Menarik Data dari Cloud! Sistem akan memuat ulang.");
+                            location.reload();
+                        }
+                        resolve();
+                    } else {
+                        alert("Gagal menarik data dari server. Error code: " + xhr.status);
+                        reject();
+                    }
+                    isSyncing = false;
+                };
+                
+                xhr.onerror = () => {
+                    if (textSyncDown) textSyncDown.innerText = "Tarik dari Cloud";
+                    alert("Koneksi internet terputus.");
+                    isSyncing = false;
+                    reject();
+                };
+                
+                xhr.send();
             });
-            const rows = await response.json();
-            if (rows && rows.length > 0 && rows[0].data_json) {
-                const data = rows[0].data_json;
-                // Simpan SEMUA data (agar struktur cloud utuh saat kita kirim balik)
-                if (data.santri) await setDB('pondok_santri', data.santri);
-                if (data.users) await setDB('pondok_users', data.users);
-                if (data.yayasan) await setDB('pondok_yayasan', data.yayasan);
-                // Biarkan tabel lain (kelas, absen) ikut tersimpan utuh di IndexedDB background.
-                alert("Berhasil Menarik Data dari Cloud! Sistem akan memuat ulang.");
-                location.reload();
-            }
-        } catch (err) { alert("Gagal menarik data dari server. Periksa jaringan internet."); }
+        } catch (err) { 
+            if (textSyncDown) textSyncDown.innerText = "Tarik dari Cloud";
+            alert("Terjadi kesalahan sistem saat tarik data.");
+            isSyncing = false;
+        }
     }
 
     async function sinkronisasiKeCloud() {
+        if (isSyncing) return;
         if (!supabaseConfig.url || !supabaseConfig.key) return alert("Konfigurasi belum diisi.");
+        
+        isSyncing = true;
+        const textSyncUp = document.getElementById('text-sync-up');
+        if (textSyncUp) textSyncUp.innerText = "MENYIAPKAN...";
+
         try {
-            const resCloud = await fetch(`${supabaseConfig.url}/rest/v1/backup_lms?id=eq.1&select=data_json,updated_at`, { headers: { 'apikey': supabaseConfig.key, 'Authorization': `Bearer ${supabaseConfig.key}` } });
+            // Ambil data dari cloud untuk divalidasi dan di-merge dengan lokal
+            const resCloud = await fetch(`${supabaseConfig.url}/rest/v1/backup_lms?id=eq.1&select=data_json,updated_at`, { 
+                headers: { 'apikey': supabaseConfig.key, 'Authorization': `Bearer ${supabaseConfig.key}` } 
+            });
             const rows = await resCloud.json();
             let dataCloud = (rows.length > 0) ? rows[0].data_json : {};
             let cloudUpdatedAt = (rows.length > 0) ? rows[0].updated_at : null;
 
-            // Merging HANYA Santri & Users, yang lain oper balik dataCloud
+            // Merging HANYA Santri & Users, tabel lainnya lempar balik dataCloud aslinya
             const payloadMerged = {
                 santri: gabungDataArray(await getDB('pondok_santri', []), dataCloud.santri, 'id'),
                 users: gabungDataArray(await getDB('pondok_users', []), dataCloud.users, 'username'),
-                // Pertahankan tabel utuh milik aplikasi utama
                 kelas: dataCloud.kelas || [], mapel: dataCloud.mapel || [], absensi: dataCloud.absensi || [], tagihan: dataCloud.tagihan || [], tabungan: dataCloud.tabungan || [], yayasan: dataCloud.yayasan || {}, izin_aktif: dataCloud.izin_aktif || []
             };
 
             const waktuKirim = new Date().toISOString();
-            await fetch(`${supabaseConfig.url}/rest/v1/backup_lms?id=eq.1`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json', 'apikey': supabaseConfig.key, 'Authorization': `Bearer ${supabaseConfig.key}`, 'Prefer': 'return=representation' },
-                body: JSON.stringify({ data_json: payloadMerged, updated_at: waktuKirim })
+
+            return new Promise((resolve, reject) => {
+                const xhr = new XMLHttpRequest();
+                let patchUrl = `${supabaseConfig.url}/rest/v1/backup_lms?id=eq.1`;
+                
+                xhr.open('PATCH', patchUrl, true);
+                xhr.setRequestHeader('Content-Type', 'application/json');
+                xhr.setRequestHeader('apikey', supabaseConfig.key);
+                xhr.setRequestHeader('Authorization', `Bearer ${supabaseConfig.key}`);
+                xhr.setRequestHeader('Prefer', 'return=representation');
+
+                // Eksekusi Progress Bar ke UI
+                xhr.upload.onprogress = (event) => {
+                    if (event.lengthComputable) {
+                        let persen = Math.round((event.loaded / event.total) * 100);
+                        if (textSyncUp) textSyncUp.innerText = `MENGUNGGAH (${persen}%)`;
+                    }
+                };
+
+                xhr.onload = () => {
+                    if (textSyncUp) textSyncUp.innerText = "Kirim ke Cloud";
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        alert("Sinkronisasi Sukses!");
+                        resolve();
+                    } else {
+                        alert("Gagal sinkronisasi data. Status: " + xhr.status);
+                        reject();
+                    }
+                    isSyncing = false;
+                };
+                
+                xhr.onerror = () => {
+                    if (textSyncUp) textSyncUp.innerText = "Kirim ke Cloud";
+                    alert("Koneksi terputus saat mengunggah data!");
+                    isSyncing = false;
+                    reject();
+                };
+                
+                xhr.send(JSON.stringify({ data_json: payloadMerged, updated_at: waktuKirim }));
             });
 
-            alert("Sinkronisasi Sukses!");
-        } catch (err) { alert("Koneksi Terputus!"); }
+        } catch (err) { 
+            if (textSyncUp) textSyncUp.innerText = "Kirim ke Cloud";
+            alert("Kesalahan persiapan koneksi."); 
+            isSyncing = false;
+        }
     }
 
     // ==========================================
