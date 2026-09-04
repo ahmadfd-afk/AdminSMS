@@ -24,7 +24,6 @@
     <link rel="apple-touch-icon" sizes="180x180" href="./icons/apple-touch-icon.png">
 
     <style>
-        /* CSS PERSIS SAMA DENGAN INDEX 1 (26).html */
         :root {
             --primary: #04432A;
             --primary-light: #0B6B46;
@@ -88,15 +87,13 @@
         .wadah-scroll-santri { max-height: 520px; overflow-y: auto; overflow-x: auto; border: 1px solid rgba(0,0,0,0.08); border-radius: 12px; background: #ffffff; margin-bottom: 10px; }
         .hidden { display: none !important; }
 
-        #id-card-modal, #modal-scanner-login, #modal-sertifikat { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column; padding: 15px; }
+        #id-card-modal, #modal-scanner-login { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column; padding: 15px; }
         
-        /* CSS ID CARD & LAINNYA */
+        #global-loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); z-index: 999999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; transition: 0.3s all ease; }
+        
         .id-card-wrapper { width: 324px; height: 204px; background: rgba(255, 255, 255, 0.35); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.6); border-radius: 14px; overflow: hidden; position: relative; box-shadow: 0 15px 35px rgba(0,0,0,0.2); display: flex; flex-direction: column; margin: 0 auto; }
-        .id-card-wrapper.portrait { width: 204px; height: 324px; }
         .id-card-wrapper::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 50%; background: linear-gradient(135deg, var(--primary), var(--primary-light)); clip-path: polygon(0 0, 100% 0, 100% 45%, 0% 100%); z-index: -2; }
-        .id-card-wrapper.portrait::before { height: 42%; clip-path: polygon(0 0, 100% 0, 100% 65%, 0% 100%); }
         .id-card-wrapper::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 50%; background: var(--accent); clip-path: polygon(0 0, 100% 0, 100% 50%, 0% 105%); z-index: -3; }
-        .id-card-wrapper.portrait::after { height: 42%; clip-path: polygon(0 0, 100% 0, 100% 70%, 0% 105%); }
 
         .id-header { background: transparent !important; color: white; border: none; padding: 12px 14px 8px 14px; display: flex; align-items: center; justify-content: flex-start; gap: 10px; }
         .id-header img { width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.95); padding: 3px; object-fit: contain; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
@@ -120,6 +117,13 @@
     <h2 id="splash-title" style="margin-top:20px; color:var(--primary); font-weight:800; text-transform:uppercase; letter-spacing:2px; font-size:1.2rem;">Memuat...</h2>
 </div>
 
+<!-- OVERLAY LOADING BARU -->
+<div id="global-loading-overlay" class="hidden">
+    <i class="fa-solid fa-cloud-arrow-up fa-fade" id="loading-icon" style="font-size: 3.5rem; color: var(--accent); margin-bottom: 18px;"></i>
+    <h2 id="loading-title" style="margin:0; font-weight:800; letter-spacing:1px; text-transform: uppercase;">MEMPROSES</h2>
+    <p id="loading-text" style="font-size:1.1rem; opacity:0.9; margin-top:8px; font-weight:600;">Mohon Tunggu...</p>
+</div>
+
 <div class="app-container" id="main-app-container">
     <header id="app-header" class="hidden">
         <div class="header-top">
@@ -136,8 +140,8 @@
                     <i class="fa-solid fa-caret-down"></i>
                 </div>
                 <div id="profile-dropdown-menu" class="profile-dropdown-menu hidden">
-                    <div class="dropdown-item" onclick="sinkronisasiKeCloud()" style="color:var(--info);"><i class="fa-solid fa-cloud-arrow-up"></i><span id="text-sync-up">Kirim ke Cloud</span></div>
-                    <div class="dropdown-item" onclick="tarikDataDariSupabase()" style="color:var(--warning);"><i class="fa-solid fa-cloud-arrow-down"></i><span id="text-sync-down">Tarik dari Cloud</span></div>
+                    <div class="dropdown-item" onclick="sinkronisasiKeCloud()" style="color:var(--info);"><i class="fa-solid fa-cloud-arrow-up"></i><span>Kirim ke Cloud</span></div>
+                    <div class="dropdown-item" onclick="tarikDataDariSupabase()" style="color:var(--warning);"><i class="fa-solid fa-cloud-arrow-down"></i><span>Tarik dari Cloud</span></div>
                     <div class="dropdown-item" onclick="prosesLogout()" style="color:var(--danger);"><i class="fa-solid fa-right-from-bracket"></i><span>Keluar Akun</span></div>
                 </div>
             </div>
@@ -194,7 +198,6 @@
                 </button>
             </div>
 
-            <!-- Form Registrasi -->
             <div class="card card-premium" id="card-registrasi-santri">
                 <h3 id="form-santri-title" style="margin-bottom: 14px; color: var(--primary);">Tambah Santri</h3>
                 <input type="hidden" id="edit-id-santri" value="">
@@ -227,7 +230,6 @@
                 <button class="btn-outline hidden" id="btn-batal-edit-santri" onclick="batalEditSantri()" style="border-color: var(--danger); color: var(--danger);">BATAL EDIT</button>
             </div>
             
-            <!-- Tabel Database Santri -->
             <div class="card">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <h3 id="title-db-santri" style="color: var(--primary); margin: 0;">Data Santri</h3>
@@ -295,16 +297,41 @@
 </div>
 
 <script>
-    // ==========================================
-    // 1. INISIALISASI DATABASE & STATE
-    // ==========================================
     window.dbCache = {}; 
     const KODE_RAHASIA_SYNC = "SYNC_PONDOK_SUPABASE_ENTERPRISE_V1";
     let currentUser = null, scannerLoginData = null;
     let tempFotoSantriBase64 = ''; 
     let modeTampilanSantri = 'aktif';
     let supabaseConfig = { url: '', key: '' };
-    let isSyncing = false; // Pengaman double klik
+    let isSyncing = false; 
+
+    // --- FUNGSI LOADING OVERLAY BARU ---
+    function showLoadingOverlay(tipe) {
+        document.getElementById('profile-dropdown-menu').classList.add('hidden'); // Tutup dropdown
+        const overlay = document.getElementById('global-loading-overlay');
+        const icon = document.getElementById('loading-icon');
+        const title = document.getElementById('loading-title');
+        const text = document.getElementById('loading-text');
+
+        if(tipe === 'upload') {
+            icon.className = "fa-solid fa-cloud-arrow-up fa-fade";
+            title.innerText = "MENGUNGGAH KE CLOUD";
+        } else {
+            icon.className = "fa-solid fa-cloud-arrow-down fa-fade";
+            title.innerText = "MENGUNDUH DARI CLOUD";
+        }
+        text.innerText = "Menghubungkan ke Server...";
+        overlay.classList.remove('hidden');
+    }
+
+    function updateLoadingText(text) {
+        document.getElementById('loading-text').innerText = text;
+    }
+
+    function hideLoadingOverlay() {
+        document.getElementById('global-loading-overlay').classList.add('hidden');
+    }
+    // ------------------------------------
 
     async function getDB(key, fallback = null) { 
         if (window.dbCache[key] !== undefined && window.dbCache[key] !== null) return window.dbCache[key];
@@ -316,7 +343,6 @@
         return await localforage.setItem(key, dataObj); 
     }
 
-    // Fungsi tambahan untuk memuat identitas institusi ke UI
     async function loadIdentitasApp() {
         try {
             const yayasan = await getDB('pondok_yayasan');
@@ -325,146 +351,83 @@
                 const headerLogo = document.getElementById('header-logo');
                 if (loginLogo && yayasan.logo) loginLogo.src = yayasan.logo;
                 if (headerLogo && yayasan.logo) headerLogo.src = yayasan.logo;
-
                 const loginName = document.getElementById('login-pondok-name');
                 const headerName = document.getElementById('yayasan-name-pondok');
                 if (loginName && yayasan.pondok) loginName.innerText = yayasan.pondok;
                 if (headerName && yayasan.pondok) headerName.innerText = yayasan.pondok;
-
                 const bgLogin = document.getElementById('view-login');
-                if (bgLogin && yayasan.wallpaper) {
-                    bgLogin.style.backgroundImage = `url('${yayasan.wallpaper}')`;
-                }
+                if (bgLogin && yayasan.wallpaper) bgLogin.style.backgroundImage = `url('${yayasan.wallpaper}')`;
             }
-        } catch (error) {
-            console.log("Data identitas gagal dimuat:", error);
-        }
+        } catch (error) {}
     }
 
     async function initApp() {
-        const splashTitle = document.getElementById('splash-title');
-        if(splashTitle) splashTitle.innerText = "Memuat Database...";
-
         try {
             const keys = await localforage.keys();
             for (let key of keys) { window.dbCache[key] = await localforage.getItem(key); }
             supabaseConfig = await getDB('pondok_supabase_config', { url: '', key: '' });
-        } catch (err) { console.error("Gagal load dari IndexedDB:", err); }
-
-        // Memanggil fungsi penyesuaian UI
+        } catch (err) {}
         await loadIdentitasApp();
-
-        setTimeout(() => {
-            const splash = document.getElementById('splash-screen');
-            if(splash) { splash.style.opacity = '0'; setTimeout(() => splash.style.display = 'none', 600); }
-        }, 500);
-
+        setTimeout(() => { const splash = document.getElementById('splash-screen'); if(splash) { splash.style.opacity = '0'; setTimeout(() => splash.style.display = 'none', 600); } }, 500);
         if (!window.dbCache['pondok_santri']) setDB('pondok_santri', []);
-        
-        // Cek Sesi Aktif
         const savedSession = await getDB('pondok_active_user', null);
-        if (savedSession && savedSession.role) { 
-            currentUser = savedSession; 
-            masukKeSistemSetelahLogin(); 
-        }
+        if (savedSession && savedSession.role) { currentUser = savedSession; masukKeSistemSetelahLogin(); }
     }
 
-    // ==========================================
-    // 2. LOGIKA LOGIN 
-    // ==========================================
     function switchModeLogin(mode) {
         document.getElementById('login-error').classList.add('hidden');
         if (mode === 'pin') {
-            document.getElementById('login-area-pin').classList.remove('hidden');
-            document.getElementById('login-area-user').classList.add('hidden');
-            document.getElementById('tab-btn-pin').className = 'btn-primary';
-            document.getElementById('tab-btn-user').className = 'btn-outline';
-            document.getElementById('tab-btn-user').style.color = 'white';
+            document.getElementById('login-area-pin').classList.remove('hidden'); document.getElementById('login-area-user').classList.add('hidden');
+            document.getElementById('tab-btn-pin').className = 'btn-primary'; document.getElementById('tab-btn-user').className = 'btn-outline'; document.getElementById('tab-btn-user').style.color = 'white';
         } else {
-            document.getElementById('login-area-pin').classList.add('hidden');
-            document.getElementById('login-area-user').classList.remove('hidden');
-            document.getElementById('tab-btn-pin').className = 'btn-outline';
-            document.getElementById('tab-btn-pin').style.color = 'white';
-            document.getElementById('tab-btn-user').className = 'btn-primary';
+            document.getElementById('login-area-pin').classList.add('hidden'); document.getElementById('login-area-user').classList.remove('hidden');
+            document.getElementById('tab-btn-pin').className = 'btn-outline'; document.getElementById('tab-btn-pin').style.color = 'white'; document.getElementById('tab-btn-user').className = 'btn-primary';
         }
     }
 
     async function prosesLoginPIN() {
         const pinVal = document.getElementById('login-pin-input').value.trim();
-        let users = await getDB('pondok_users', []);
-        let matchedUser = users.find(u => u.pin_login && u.pin_login === pinVal);
-        if (matchedUser) {
-            currentUser = matchedUser;
-            await setDB('pondok_active_user', currentUser); 
-            masukKeSistemSetelahLogin();
-        } else { 
-            document.getElementById('login-error').classList.remove('hidden'); 
-            document.getElementById('login-pin-input').value = ""; 
-        }
+        let users = await getDB('pondok_users', []); let matchedUser = users.find(u => u.pin_login && u.pin_login === pinVal);
+        if (matchedUser) { currentUser = matchedUser; await setDB('pondok_active_user', currentUser); masukKeSistemSetelahLogin(); } 
+        else { document.getElementById('login-error').classList.remove('hidden'); document.getElementById('login-pin-input').value = ""; }
     }
 
     async function prosesLogin() { 
-        const usernameInput = document.getElementById('login-username').value; 
-        const passwordInput = document.getElementById('login-password').value; 
-        let users = await getDB('pondok_users', []); 
-        currentUser = users.find(user => user.username === usernameInput && user.password === passwordInput); 
-        if (currentUser) { 
-            await setDB('pondok_active_user', currentUser); 
-            masukKeSistemSetelahLogin(); 
-        } else { 
-            document.getElementById('login-error').classList.remove('hidden'); 
-        } 
+        const u = document.getElementById('login-username').value; const p = document.getElementById('login-password').value; 
+        let users = await getDB('pondok_users', []); currentUser = users.find(user => user.username === u && user.password === p); 
+        if (currentUser) { await setDB('pondok_active_user', currentUser); masukKeSistemSetelahLogin(); } 
+        else { document.getElementById('login-error').classList.remove('hidden'); } 
     }
 
     function masukKeSistemSetelahLogin() {
         document.getElementById('header-user-name').innerText = currentUser.nama || "User";
         document.getElementById('header-user-photo').src = currentUser.foto || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
-        
-        document.getElementById('view-login').classList.add('hidden'); 
-        document.getElementById('app-header').classList.remove('hidden'); 
-        
-        // PENTING: Bypass menu lain, langsung panggil view-santri
-        document.getElementById('view-santri').classList.remove('hidden');
-        switchTabSantri('aktif'); 
+        document.getElementById('view-login').classList.add('hidden'); document.getElementById('app-header').classList.remove('hidden'); 
+        document.getElementById('view-santri').classList.remove('hidden'); switchTabSantri('aktif'); 
     }
 
-    function prosesLogout() { 
-        localforage.removeItem('pondok_active_user').then(() => {
-            window.dbCache = {};
-            location.reload(); 
-        });
-    }
+    function prosesLogout() { localforage.removeItem('pondok_active_user').then(() => { window.dbCache = {}; location.reload(); }); }
 
-    // ==========================================
-    // 3. LOGIKA CRUD SANTRI
-    // ==========================================
     function kompresiGambar(fileImage, maxLebar, callbackSelesai) {
         if(!fileImage) return callbackSelesai(''); 
         const readerData = new FileReader(); readerData.readAsDataURL(fileImage);
-        readerData.onload = (eventReader) => {
-            const objekGambar = new Image(); objekGambar.src = eventReader.target.result;
-            objekGambar.onload = () => { 
-                const elemenCanvas = document.createElement('canvas'); 
-                const rasioSkala = maxLebar / objekGambar.width; 
-                if(objekGambar.width < maxLebar) { elemenCanvas.width = objekGambar.width; elemenCanvas.height = objekGambar.height; } 
-                else { elemenCanvas.width = maxLebar; elemenCanvas.height = objekGambar.height * rasioSkala; } 
-                const konteks = elemenCanvas.getContext('2d'); 
-                konteks.drawImage(objekGambar, 0, 0, elemenCanvas.width, elemenCanvas.height); 
-                callbackSelesai(elemenCanvas.toDataURL('image/png')); 
+        readerData.onload = (e) => {
+            const obj = new Image(); obj.src = e.target.result;
+            obj.onload = () => { 
+                const canvas = document.createElement('canvas'); const rasio = maxLebar / obj.width; 
+                if(obj.width < maxLebar) { canvas.width = obj.width; canvas.height = obj.height; } else { canvas.width = maxLebar; canvas.height = obj.height * rasio; } 
+                const ctx = canvas.getContext('2d'); ctx.drawImage(obj, 0, 0, canvas.width, canvas.height); callbackSelesai(canvas.toDataURL('image/png')); 
             }
         }
     }
 
     function previewFotoSantri(event) { 
-        const file = event.target.files[0]; 
-        if (!file) return; 
+        const file = event.target.files[0]; if (!file) return; 
         const btnSimpan = document.getElementById('btn-simpan-santri');
         if (btnSimpan) { btnSimpan.disabled = true; btnSimpan.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> MEMPROSES...'; }
-
-        kompresiGambar(file, 150, (base64Hasil) => { 
-            tempFotoSantriBase64 = base64Hasil; 
-            const imgPreview = document.getElementById('preview-foto-santri-ui'); 
-            imgPreview.src = base64Hasil; imgPreview.style.display = 'block'; 
+        kompresiGambar(file, 150, (base64) => { 
+            tempFotoSantriBase64 = base64; const imgPreview = document.getElementById('preview-foto-santri-ui'); 
+            imgPreview.src = base64; imgPreview.style.display = 'block'; 
             if (btnSimpan) { btnSimpan.disabled = false; btnSimpan.innerText = document.getElementById('edit-id-santri').value !== "" ? "UPDATE DATA" : "SIMPAN DATA"; }
         }); 
     }
@@ -479,101 +442,50 @@
     }
 
     async function simpanSantri() { 
-        const idEdit = document.getElementById('edit-id-santri').value; 
-        const namaLengkap = document.getElementById('input-nama-santri').value; 
-        const nomorKamar = document.getElementById('input-kamar-santri').value; 
-        const alamatAsal = document.getElementById('input-alamat-santri').value; 
-        const pilihanAsrama = document.getElementById('input-asrama-santri').value; 
-        const nikSantri = document.getElementById('input-nik-santri').value;
+        const idEdit = document.getElementById('edit-id-santri').value; const nama = document.getElementById('input-nama-santri').value; 
+        const kamar = document.getElementById('input-kamar-santri').value; const alamat = document.getElementById('input-alamat-santri').value; 
+        const asrama = document.getElementById('input-asrama-santri').value; const nik = document.getElementById('input-nik-santri').value;
 
-        if(!namaLengkap || !nomorKamar) return alert("Nama Lengkap & Kamar Wajib Diisi!"); 
-        let databaseSantri = await getDB('pondok_santri', []); 
-        let fotoBase64Hasil = tempFotoSantriBase64; 
+        if(!nama || !kamar) return alert("Nama Lengkap & Kamar Wajib Diisi!"); 
+        let db = await getDB('pondok_santri', []); let fotoBase = tempFotoSantriBase64; 
 
         if(idEdit) { 
-            const index = databaseSantri.findIndex(s => s.id == idEdit); 
-            if(index !== -1) { 
-                databaseSantri[index].nama = namaLengkap; 
-                databaseSantri[index].kamar = nomorKamar; 
-                databaseSantri[index].alamat = alamatAsal; 
-                databaseSantri[index].asrama = pilihanAsrama; 
-                databaseSantri[index].nik = nikSantri; 
-                if(fotoBase64Hasil !== '') databaseSantri[index].foto = fotoBase64Hasil; 
-            } 
+            const idx = db.findIndex(s => s.id == idEdit); 
+            if(idx !== -1) { db[idx].nama = nama; db[idx].kamar = kamar; db[idx].alamat = alamat; db[idx].asrama = asrama; db[idx].nik = nik; if(fotoBase !== '') db[idx].foto = fotoBase; } 
             alert("Data Berhasil Diperbarui!"); 
         } else { 
-            const nisTerbentuk = new Date().getFullYear().toString().slice(-2) + String(Date.now()).slice(-4); 
-            if(fotoBase64Hasil === '') fotoBase64Hasil = 'https://cdn-icons-png.flaticon.com/512/847/847969.png'; 
-            databaseSantri.push({ id: Date.now(), nis: nisTerbentuk, nik: nikSantri, nama: namaLengkap, alamat: alamatAsal, asrama: pilihanAsrama, kamar: nomorKamar, foto: fotoBase64Hasil, is_alumni: false }); 
-            alert(`Registrasi Berhasil!\nNIS: ${nisTerbentuk}`); 
+            const nisBaru = new Date().getFullYear().toString().slice(-2) + String(Date.now()).slice(-4); 
+            if(fotoBase === '') fotoBase = 'https://cdn-icons-png.flaticon.com/512/847/847969.png'; 
+            db.push({ id: Date.now(), nis: nisBaru, nik: nik, nama: nama, alamat: alamat, asrama: asrama, kamar: kamar, foto: fotoBase, is_alumni: false }); alert(`Registrasi Berhasil!\nNIS: ${nisBaru}`); 
         } 
-
-        await setDB('pondok_santri', databaseSantri); 
-        batalEditSantri(); 
-        renderTabelSantri(); 
+        await setDB('pondok_santri', db); batalEditSantri(); renderTabelSantri(); 
     }
 
     function batalEditSantri() { 
-        document.getElementById('edit-id-santri').value = ""; 
-        document.getElementById('input-nama-santri').value = ""; 
-        document.getElementById('input-nik-santri').value = ""; 
-        document.getElementById('input-kamar-santri').value = ""; 
-        document.getElementById('input-alamat-santri').value = ""; 
-        document.getElementById('preview-foto-santri-ui').style.display = "none"; 
-        tempFotoSantriBase64 = ''; 
-        document.getElementById('form-santri-title').innerText = "Tambah Santri"; 
-        document.getElementById('btn-simpan-santri').innerText = "SIMPAN DATA"; 
-        document.getElementById('btn-batal-edit-santri').classList.add('hidden'); 
+        document.getElementById('edit-id-santri').value = ""; document.getElementById('input-nama-santri').value = ""; document.getElementById('input-nik-santri').value = ""; document.getElementById('input-kamar-santri').value = ""; document.getElementById('input-alamat-santri').value = ""; document.getElementById('preview-foto-santri-ui').style.display = "none"; tempFotoSantriBase64 = ''; 
+        document.getElementById('form-santri-title').innerText = "Tambah Santri"; document.getElementById('btn-simpan-santri').innerText = "SIMPAN DATA"; document.getElementById('btn-batal-edit-santri').classList.add('hidden'); 
     }
 
-    async function editSantriMode(idString) { 
-        let db = await getDB('pondok_santri', []); 
-        let santri = db.find(s => s.id == idString); 
-        if(!santri) return; 
-        document.getElementById('edit-id-santri').value = santri.id; 
-        document.getElementById('input-nama-santri').value = santri.nama; 
-        document.getElementById('input-nik-santri').value = santri.nik || ''; 
-        document.getElementById('input-kamar-santri').value = santri.kamar; 
-        document.getElementById('input-alamat-santri').value = santri.alamat; 
-        document.getElementById('input-asrama-santri').value = santri.asrama; 
-        document.getElementById('form-santri-title').innerText = `Edit Data Santri`; 
-        document.getElementById('btn-simpan-santri').innerText = "UPDATE DATA"; 
-        document.getElementById('btn-batal-edit-santri').classList.remove('hidden'); 
-        window.scrollTo(0,0); 
+    async function editSantriMode(idStr) { 
+        let db = await getDB('pondok_santri', []); let s = db.find(x => x.id == idStr); if(!s) return; 
+        document.getElementById('edit-id-santri').value = s.id; document.getElementById('input-nama-santri').value = s.nama; document.getElementById('input-nik-santri').value = s.nik || ''; document.getElementById('input-kamar-santri').value = s.kamar; document.getElementById('input-alamat-santri').value = s.alamat; document.getElementById('input-asrama-santri').value = s.asrama; 
+        document.getElementById('form-santri-title').innerText = `Edit Data Santri`; document.getElementById('btn-simpan-santri').innerText = "UPDATE DATA"; document.getElementById('btn-batal-edit-santri').classList.remove('hidden'); window.scrollTo(0,0); 
     }
 
-    async function hapusSantri(idSantri) {
+    async function hapusSantri(id) {
         if (!confirm(`Yakin ingin menghapus data santri ini?`)) return;
-        let dbSantri = await getDB('pondok_santri', []);
-        let sisaSantri = dbSantri.filter(s => s.id != idSantri);
-        await setDB('pondok_santri', sisaSantri);
-        
-        let tombstones = await getDB('pondok_tombstone_santri', []);
-        tombstones.push(idSantri);
-        await setDB('pondok_tombstone_santri', tombstones);
-        
-        renderTabelSantri();
+        let db = await getDB('pondok_santri', []); let sisa = db.filter(s => s.id != id); await setDB('pondok_santri', sisa);
+        let tb = await getDB('pondok_tombstone_santri', []); tb.push(id); await setDB('pondok_tombstone_santri', tb); renderTabelSantri();
     }
 
     async function renderTabelSantri() { 
-        let databaseSantri = await getDB('pondok_santri', []);
-        const keyword = (document.getElementById('input-search-santri').value || '').toLowerCase();
-        
-        const dataDitampilkan = databaseSantri.filter(s => {
-            let matchStatus = modeTampilanSantri === 'alumni' ? s.is_alumni : !s.is_alumni;
-            let matchSearch = s.nama.toLowerCase().includes(keyword) || s.nis.includes(keyword) || s.kamar.toLowerCase().includes(keyword);
-            return matchStatus && matchSearch;
-        });
-
-        document.getElementById(modeTampilanSantri === 'aktif' ? 'count-santri-aktif' : 'count-santri-alumni').innerText = dataDitampilkan.length;
-
-        const elemenTbody = document.getElementById('tabel-santri-body');
-        elemenTbody.innerHTML = ''; 
-
-        if(dataDitampilkan.length === 0) return elemenTbody.innerHTML = `<tr><td colspan="3" align="center">Belum ada data.</td></tr>`; 
-
-        dataDitampilkan.forEach(s => {
-            elemenTbody.innerHTML += `<tr>
+        let db = await getDB('pondok_santri', []); const key = (document.getElementById('input-search-santri').value || '').toLowerCase();
+        const data = db.filter(s => { let matchStatus = modeTampilanSantri === 'alumni' ? s.is_alumni : !s.is_alumni; let matchSearch = s.nama.toLowerCase().includes(key) || s.nis.includes(key) || s.kamar.toLowerCase().includes(key); return matchStatus && matchSearch; });
+        document.getElementById(modeTampilanSantri === 'aktif' ? 'count-santri-aktif' : 'count-santri-alumni').innerText = data.length;
+        const tbody = document.getElementById('tabel-santri-body'); tbody.innerHTML = ''; 
+        if(data.length === 0) return tbody.innerHTML = `<tr><td colspan="3" align="center">Belum ada data.</td></tr>`; 
+        data.forEach(s => {
+            tbody.innerHTML += `<tr>
                 <td><strong>${s.nis}</strong><br><span style="font-size:0.65rem; color:var(--text-muted);">${modeTampilanSantri === 'aktif' ? s.kamar : s.tahun_lulus}</span></td>
                 <td>${s.nama}</td>
                 <td>
@@ -589,52 +501,29 @@
 
     function cariDataSantri() { renderTabelSantri(); }
 
-    // ==========================================
-    // 4. KONEKSI CLOUD / TARIK DATA
-    // ==========================================
     function bukaScannerLoginTarikData() {
         if (typeof Html5Qrcode === 'undefined') return alert("Library Scanner belum siap.");
-        document.getElementById('qr-reader-login').style.display = 'block';
-        document.getElementById('modal-scanner-login').classList.remove('hidden');
+        document.getElementById('qr-reader-login').style.display = 'block'; document.getElementById('modal-scanner-login').classList.remove('hidden');
         if (!scannerLoginData) {
             scannerLoginData = new Html5Qrcode("qr-reader-login");
             scannerLoginData.start({ facingMode: "environment" }, { fps: 15, qrbox: { width: 220, height: 220 } }, async (res) => {
                 try {
                     const obj = JSON.parse(res);
                     if (obj.code === KODE_RAHASIA_SYNC) {
-                        supabaseConfig = { url: obj.url, key: obj.key };
-                        await setDB('pondok_supabase_config', supabaseConfig);
-                        tutupScannerLoginTarikData();
-                        alert("Berhasil menghubungkan server! Menyiapkan sinkronisasi cloud...");
-                        tarikDataDariSupabase();
+                        supabaseConfig = { url: obj.url, key: obj.key }; await setDB('pondok_supabase_config', supabaseConfig); tutupScannerLoginTarikData();
+                        alert("Berhasil menghubungkan server! Menyiapkan sinkronisasi cloud..."); tarikDataDariSupabase();
                     }
                 } catch(e) { alert("Format Barcode tidak dikenali."); }
             }).catch(() => { alert("Gagal membuka kamera scan."); tutupScannerLoginTarikData(); });
         }
     }
 
-    function tutupScannerLoginTarikData() {
-        if (scannerLoginData) {
-            scannerLoginData.stop().then(() => {
-                document.getElementById('qr-reader-login').style.display = 'none';
-                document.getElementById('modal-scanner-login').classList.add('hidden');
-                scannerLoginData = null;
-            });
-        }
-    }
+    function tutupScannerLoginTarikData() { if (scannerLoginData) { scannerLoginData.stop().then(() => { document.getElementById('qr-reader-login').style.display = 'none'; document.getElementById('modal-scanner-login').classList.add('hidden'); scannerLoginData = null; }); } }
 
     function gabungDataArray(arrayLokal, arrayCloud, primaryKey) {
-        if (!arrayCloud) return arrayLokal || [];
-        if (!arrayLokal) return arrayCloud || [];
-        let mapData = new Map();
-        arrayCloud.forEach(item => { if (item[primaryKey]) mapData.set(item[primaryKey], item); });
-        arrayLokal.forEach(itemLokal => {
-            if (itemLokal[primaryKey]) {
-                let itemCloud = mapData.get(itemLokal[primaryKey]);
-                if (itemCloud && itemLokal.foto && !itemCloud.foto) itemCloud.foto = itemLokal.foto;
-                mapData.set(itemLokal[primaryKey], Object.assign({}, itemCloud || {}, itemLokal));
-            }
-        });
+        if (!arrayCloud) return arrayLokal || []; if (!arrayLokal) return arrayCloud || [];
+        let mapData = new Map(); arrayCloud.forEach(item => { if (item[primaryKey]) mapData.set(item[primaryKey], item); });
+        arrayLokal.forEach(itemLokal => { if (itemLokal[primaryKey]) { let itemCloud = mapData.get(itemLokal[primaryKey]); if (itemCloud && itemLokal.foto && !itemCloud.foto) itemCloud.foto = itemLokal.foto; mapData.set(itemLokal[primaryKey], Object.assign({}, itemCloud || {}, itemLokal)); } });
         return Array.from(mapData.values());
     }
 
@@ -643,8 +532,7 @@
         if (!supabaseConfig.url || !supabaseConfig.key) return alert('Konfigurasi URL & Key Supabase belum tersedia.');
         
         isSyncing = true;
-        const textSyncDown = document.getElementById('text-sync-down');
-        if (textSyncDown) textSyncDown.innerText = "MEMULAI UNDUHAN...";
+        showLoadingOverlay('download');
 
         try {
             return new Promise((resolve, reject) => {
@@ -656,28 +544,29 @@
                 xhr.onprogress = (event) => {
                     if (event.lengthComputable) {
                         let persen = Math.round((event.loaded / event.total) * 100);
-                        if (textSyncDown) textSyncDown.innerText = `MENGUNDUH (${persen}%)`;
+                        updateLoadingText(`Mengunduh File... ${persen}%`);
                     } else {
-                        if (textSyncDown) textSyncDown.innerText = `MENGUNDUH...`;
+                        updateLoadingText("Menerima Data (Ukuran File Tidak Diketahui)...");
                     }
                 };
 
                 xhr.onload = async () => {
-                    if (textSyncDown) textSyncDown.innerText = "Tarik dari Cloud";
                     if (xhr.status >= 200 && xhr.status < 300) {
+                        updateLoadingText("Memproses Penyimpanan Lokal...");
                         const rows = JSON.parse(xhr.responseText || "[]");
                         if (rows && rows.length > 0 && rows[0].data_json) {
                             const data = rows[0].data_json;
-                            // Simpan SEMUA data secara penuh di IndexedDB
                             if (data.santri) await setDB('pondok_santri', data.santri);
                             if (data.users) await setDB('pondok_users', data.users);
                             if (data.yayasan) await setDB('pondok_yayasan', data.yayasan);
                             
+                            hideLoadingOverlay();
                             alert("Berhasil Menarik Data dari Cloud! Sistem akan memuat ulang.");
                             location.reload();
                         }
                         resolve();
                     } else {
+                        hideLoadingOverlay();
                         alert("Gagal menarik data dari server. Error code: " + xhr.status);
                         reject();
                     }
@@ -685,7 +574,7 @@
                 };
                 
                 xhr.onerror = () => {
-                    if (textSyncDown) textSyncDown.innerText = "Tarik dari Cloud";
+                    hideLoadingOverlay();
                     alert("Koneksi internet terputus.");
                     isSyncing = false;
                     reject();
@@ -694,7 +583,7 @@
                 xhr.send();
             });
         } catch (err) { 
-            if (textSyncDown) textSyncDown.innerText = "Tarik dari Cloud";
+            hideLoadingOverlay();
             alert("Terjadi kesalahan sistem saat tarik data.");
             isSyncing = false;
         }
@@ -705,19 +594,15 @@
         if (!supabaseConfig.url || !supabaseConfig.key) return alert("Konfigurasi belum diisi.");
         
         isSyncing = true;
-        const textSyncUp = document.getElementById('text-sync-up');
-        if (textSyncUp) textSyncUp.innerText = "MENYIAPKAN...";
+        showLoadingOverlay('upload');
+        updateLoadingText("Memverifikasi Data Terakhir di Server...");
 
         try {
-            // Ambil data dari cloud untuk divalidasi dan di-merge dengan lokal
-            const resCloud = await fetch(`${supabaseConfig.url}/rest/v1/backup_lms?id=eq.1&select=data_json,updated_at`, { 
-                headers: { 'apikey': supabaseConfig.key, 'Authorization': `Bearer ${supabaseConfig.key}` } 
-            });
+            const resCloud = await fetch(`${supabaseConfig.url}/rest/v1/backup_lms?id=eq.1&select=data_json,updated_at`, { headers: { 'apikey': supabaseConfig.key, 'Authorization': `Bearer ${supabaseConfig.key}` } });
             const rows = await resCloud.json();
             let dataCloud = (rows.length > 0) ? rows[0].data_json : {};
-            let cloudUpdatedAt = (rows.length > 0) ? rows[0].updated_at : null;
 
-            // Merging HANYA Santri & Users, tabel lainnya lempar balik dataCloud aslinya
+            updateLoadingText("Menyatukan Database Lokal & Cloud...");
             const payloadMerged = {
                 santri: gabungDataArray(await getDB('pondok_santri', []), dataCloud.santri, 'id'),
                 users: gabungDataArray(await getDB('pondok_users', []), dataCloud.users, 'username'),
@@ -728,24 +613,23 @@
 
             return new Promise((resolve, reject) => {
                 const xhr = new XMLHttpRequest();
-                let patchUrl = `${supabaseConfig.url}/rest/v1/backup_lms?id=eq.1`;
-                
-                xhr.open('PATCH', patchUrl, true);
+                xhr.open('PATCH', `${supabaseConfig.url}/rest/v1/backup_lms?id=eq.1`, true);
                 xhr.setRequestHeader('Content-Type', 'application/json');
                 xhr.setRequestHeader('apikey', supabaseConfig.key);
                 xhr.setRequestHeader('Authorization', `Bearer ${supabaseConfig.key}`);
                 xhr.setRequestHeader('Prefer', 'return=representation');
 
-                // Eksekusi Progress Bar ke UI
                 xhr.upload.onprogress = (event) => {
                     if (event.lengthComputable) {
                         let persen = Math.round((event.loaded / event.total) * 100);
-                        if (textSyncUp) textSyncUp.innerText = `MENGUNGGAH (${persen}%)`;
+                        updateLoadingText(`Mengirim Paket Data... ${persen}%`);
+                    } else {
+                        updateLoadingText(`Mengirim Paket Data...`);
                     }
                 };
 
                 xhr.onload = () => {
-                    if (textSyncUp) textSyncUp.innerText = "Kirim ke Cloud";
+                    hideLoadingOverlay();
                     if (xhr.status >= 200 && xhr.status < 300) {
                         alert("Sinkronisasi Sukses!");
                         resolve();
@@ -757,7 +641,7 @@
                 };
                 
                 xhr.onerror = () => {
-                    if (textSyncUp) textSyncUp.innerText = "Kirim ke Cloud";
+                    hideLoadingOverlay();
                     alert("Koneksi terputus saat mengunggah data!");
                     isSyncing = false;
                     reject();
@@ -767,43 +651,26 @@
             });
 
         } catch (err) { 
-            if (textSyncUp) textSyncUp.innerText = "Kirim ke Cloud";
+            hideLoadingOverlay();
             alert("Kesalahan persiapan koneksi."); 
             isSyncing = false;
         }
     }
 
-    // ==========================================
-    // 5. CETAK ID CARD & PWA
-    // ==========================================
     async function prosesCetakIDCard(identifier) { 
-        const yayasan = await getDB('pondok_yayasan', {}); 
-        const card = document.getElementById('area-cetak-kartu'); 
-        card.style.backgroundImage = yayasan.bg_idcard ? `url('${yayasan.bg_idcard}')` : `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" opacity="0.05"><circle cx="50" cy="50" r="40" stroke="%2304432A" stroke-width="2" fill="none"/></svg>')`; 
-        document.getElementById('card-logo').src = yayasan.logo || "https://cdn-icons-png.flaticon.com/512/3592/3592078.png"; 
-        document.getElementById('card-pondok').innerText = yayasan.pondok || "Sistem Manajemen"; 
-        document.getElementById('card-yayasan').innerText = yayasan.yayasan || "Instansi"; 
-
+        const y = await getDB('pondok_yayasan', {}); const card = document.getElementById('area-cetak-kartu'); 
+        card.style.backgroundImage = y.bg_idcard ? `url('${y.bg_idcard}')` : `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" opacity="0.05"><circle cx="50" cy="50" r="40" stroke="%2304432A" stroke-width="2" fill="none"/></svg>')`; 
+        document.getElementById('card-logo').src = y.logo || "https://cdn-icons-png.flaticon.com/512/3592/3592078.png"; document.getElementById('card-pondok').innerText = y.pondok || "Sistem Manajemen"; document.getElementById('card-yayasan').innerText = y.yayasan || "Instansi"; 
         let db = await getDB('pondok_santri', []); let s = db.find(x => x.nis === identifier); if(!s) return; 
-        document.getElementById('card-foto').src = s.foto || ""; 
-        document.getElementById('card-nama').innerText = s.nama; 
-        document.getElementById('label-nomor').innerText = "NIS:"; document.getElementById('card-nis').innerText = s.nis; 
-        document.getElementById('card-alamat').innerText = (s.alamat || '-'); 
-        
-        let qrDataPayload = "https://ahmadfd-afk.github.io/Wali-santri/?nis=" + s.nis;
-        if (typeof JsBarcode !== 'undefined') {
-            JsBarcode("#card-barcode", s.nis, { format: "CODE128", width: 2.2, height: 30, displayValue: false, background: "transparent" });
-        }
+        document.getElementById('card-foto').src = s.foto || ""; document.getElementById('card-nama').innerText = s.nama; document.getElementById('label-nomor').innerText = "NIS:"; document.getElementById('card-nis').innerText = s.nis; document.getElementById('card-alamat').innerText = (s.alamat || '-'); 
+        if (typeof JsBarcode !== 'undefined') { JsBarcode("#card-barcode", s.nis, { format: "CODE128", width: 2.2, height: 30, displayValue: false, background: "transparent" }); }
         document.getElementById('id-card-modal').classList.remove('hidden'); 
     }
 
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js').then((reg) => {
-            console.log('PWA Service Worker berhasil terdaftar Lite:', reg.scope);
-        }).catch((err) => console.error('Pendaftaran SW gagal:', err));
+        navigator.serviceWorker.register('./sw.js').then((reg) => { console.log('PWA Service Worker berhasil terdaftar Lite:', reg.scope); }).catch((err) => console.error('Pendaftaran SW gagal:', err));
     }
 
-    // Eksekusi Inisialisasi
     initApp();
 </script>
 
