@@ -296,7 +296,7 @@
 
 <script>
     // ==========================================
-    // 1. INISIALISASI DATABASE & STATE (Persis Sama)
+    // 1. INISIALISASI DATABASE & STATE
     // ==========================================
     window.dbCache = {}; 
     const KODE_RAHASIA_SYNC = "SYNC_PONDOK_SUPABASE_ENTERPRISE_V1";
@@ -315,6 +315,31 @@
         return await localforage.setItem(key, dataObj); 
     }
 
+    // Fungsi tambahan untuk memuat identitas institusi ke UI
+    async function loadIdentitasApp() {
+        try {
+            const yayasan = await getDB('pondok_yayasan');
+            if (yayasan) {
+                const loginLogo = document.getElementById('login-logo');
+                const headerLogo = document.getElementById('header-logo');
+                if (loginLogo && yayasan.logo) loginLogo.src = yayasan.logo;
+                if (headerLogo && yayasan.logo) headerLogo.src = yayasan.logo;
+
+                const loginName = document.getElementById('login-pondok-name');
+                const headerName = document.getElementById('yayasan-name-pondok');
+                if (loginName && yayasan.pondok) loginName.innerText = yayasan.pondok;
+                if (headerName && yayasan.pondok) headerName.innerText = yayasan.pondok;
+
+                const bgLogin = document.getElementById('view-login');
+                if (bgLogin && yayasan.wallpaper) {
+                    bgLogin.style.backgroundImage = `url('${yayasan.wallpaper}')`;
+                }
+            }
+        } catch (error) {
+            console.log("Data identitas gagal dimuat:", error);
+        }
+    }
+
     async function initApp() {
         const splashTitle = document.getElementById('splash-title');
         if(splashTitle) splashTitle.innerText = "Memuat Database...";
@@ -324,6 +349,9 @@
             for (let key of keys) { window.dbCache[key] = await localforage.getItem(key); }
             supabaseConfig = await getDB('pondok_supabase_config', { url: '', key: '' });
         } catch (err) { console.error("Gagal load dari IndexedDB:", err); }
+
+        // Memanggil fungsi penyesuaian UI
+        await loadIdentitasApp();
 
         setTimeout(() => {
             const splash = document.getElementById('splash-screen');
@@ -341,7 +369,7 @@
     }
 
     // ==========================================
-    // 2. LOGIKA LOGIN (Route paksa ke View Santri)
+    // 2. LOGIKA LOGIN 
     // ==========================================
     function switchModeLogin(mode) {
         document.getElementById('login-error').classList.add('hidden');
@@ -407,7 +435,7 @@
     }
 
     // ==========================================
-    // 3. LOGIKA CRUD SANTRI (Persis Sama)
+    // 3. LOGIKA CRUD SANTRI
     // ==========================================
     function kompresiGambar(fileImage, maxLebar, callbackSelesai) {
         if(!fileImage) return callbackSelesai(''); 
@@ -561,7 +589,7 @@
     function cariDataSantri() { renderTabelSantri(); }
 
     // ==========================================
-    // 4. KONEKSI CLOUD / TARIK DATA (Persis Sama)
+    // 4. KONEKSI CLOUD / TARIK DATA
     // ==========================================
     function bukaScannerLoginTarikData() {
         if (typeof Html5Qrcode === 'undefined') return alert("Library Scanner belum siap.");
@@ -657,7 +685,7 @@
     }
 
     // ==========================================
-    // 5. CETAK ID CARD & PWA (Persis Sama)
+    // 5. CETAK ID CARD & PWA
     // ==========================================
     async function prosesCetakIDCard(identifier) { 
         const yayasan = await getDB('pondok_yayasan', {}); 
